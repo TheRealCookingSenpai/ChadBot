@@ -15,7 +15,13 @@ Non è un chatbot avanzato che utilizza reti neurali o algoritmi di machine lear
 
 ## Come funziona ChadBot
 
-TODO
+Il funzionamento è molto semplice.
+Inizialmente, ChadBot non sa nulla.
+Ogni volta che un utente digita qualcosa che ChadBot non sa, il bot chiede all'utente che risposta dovrebbe dare e la memorizza in un database, standardizzandola (ovvero togliendo punteggiatura e simboli) e assegnando un grado di confidenza.
+La ricerca nel database comprende, in caso non vi sia una corrispondenza esatta, una ricerca basata sulla similitudine secondo l'algoritmo chiamato Indice di Jaccard. Se una corrispondenza abbastanza simile viene trovata, essa viene scelta come risposta.
+Attraverso i comandi !y (feedback positivo), !n (feedback negativo), !o (feedback offensivo) e !i (inserzione senza feedback), l'utente può far aumentare o meno la confidenza che ha il bot nell'utilizzare una certa risposta e può inserire risposte alternative. Durante la scelta della risposta, il bot valuterà cosa rispondere anche in base alla confidenza presente, attraverso una scelta pseudo casuale pesata.
+
+N.B. I comandi !nn e !oo permettono di fornire un feedback senza inserire nuove risposte
 
 # Come hostare la propria versione di ChadBot
 
