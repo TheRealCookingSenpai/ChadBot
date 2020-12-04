@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+  <title>ChadBot - Un semplice chatbot sperimentale</title>
+  <head>
+	  <script data-ad-client="ca-pub-5933243875073992" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <link
+      rel="shortcut icon"
+      type="image/x-icon"
+      href="bot.ico"
+    />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <style>
+      body {
+        font-family: monospace;
+      }
+      h1 {
+        background-color: AntiqueWhite;
+        display: inline-block;
+        font-size: 3em;
+        margin: 0;
+        padding: 14px;
+      }
+      h3 {
+        color: black;
+        font-size: 20px;
+        margin-top: 3px;
+        text-align: center;
+      }
+      #chatbox {
+        margin-left: auto;
+        margin-right: auto;
+        width: 40%;
+        margin-top: 60px;
+      }
+      #userInput {
+        margin-left: auto;
+        margin-right: auto;
+        width: 40%;
+        margin-top: 60px;
+      }
+      #textInput {
+        width: 90%;
+        border: none;
+        border-bottom: 3px solid black;
+        font-family: monospace;
+        font-size: 17px;
+      }
+      .userText {
+        color: white;
+        font-family: monospace;
+        font-size: 17px;
+        text-align: right;
+        line-height: 30px;
+      }
+      .userText span {
+        background-color: #808080;
+        padding: 10px;
+        border-radius: 2px;
+      }
+      .botText {
+        color: white;
+        font-family: monospace;
+        font-size: 17px;
+        text-align: left;
+        line-height: 30px;
+      }
+      .botText span {
+        background-color: #4169e1;
+        padding: 10px;
+        border-radius: 2px;
+      }
+      #tidbit {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 300px;
+      }
+      .boxed {
+        margin-left: auto;
+        margin-right: auto;
+        width: 78%;
+        margin-top: 60px;
+        border: 1px solid green;
+      }
+      .box {
+        border: 2px solid black;
+      }
+      footer{
+          font-family: monospace;
+          font-size: 17px;
+          text-align: center;
+      }
+      #guide{
+          margin: 60px 60px 0 60px;
+          background-color: #4169e1;
+          color: #fff;
+          display: inline-block;
+          padding: 10px;
+          font-size: 17px;
+          font-family: monospace;
+          border: none;
+      }
+      #dropdown_guide{
+          width: 50%;
+          border: 1px solid black;
+          display: inline-block;
+          font-size: 1.2rem;
+          display: none;
+      }
+      .active{
+          display: inline-block !important;
+      }
+    </style>
+  </head>
+  <body>
+    <center>
+      <h1>ChadBot</h1>
+      <br>
+      <h3>Benvenuto.</h3>
+      <h3 style="background-color:yellow;">ChadBot è in fase embrionale, aiutalo ad apprendere insegnandogli nuove cose!</h3>
+      <h3>Scrivi !help per la guida o !cmd per i comandi disponibili, oppure chiacchiera con ChadBot.</h3>
+      <hr>
+      <h3>ChadBot è ancora giovane e non sa praticamente nulla.</h3>
+      <h3>Hai la possibilità di istruirlo e di insegnargli come rispondere!</h3>
+      <h3>ChadBot utilizza un sistema di apprendimento basato sulla fiducia e impara dagli utenti.</h3>
+      <h3>Grazie per il tuo contributo!</h3>
+    </center>
+    <div class="box"></div>
+    <div class="boxed">
+      <div>
+            <div id="chatbox">
+                <p class="botText">
+                    <span>Ciao! Dimmi qualcosa!</span>
+                </p>
+            </div>
+            <div id="userInput">
+                <input id="textInput" type="text" name="msg" placeholder="Scrivi un messaggio" maxlength="62"/>
+                <h3>Consulta la guida per istruire il ChadBot!</h3>
+                <h3>Quando ChadBot ti chiede cosa dovrebbe rispondere, hai la possibilità di aiutarlo a crescere.</h3>
+            </div>
+      </div>
+      <script>
+            function getBotResponse() {
+                var nsrawText = $("#textInput").val();
+                                var rawText = escape(nsrawText)
+                var userHtml = '<p class="userText"><span>' + rawText + "</span></p>";
+                $("#textInput").val("");
+                $("#chatbox").append(userHtml);
+                document
+                    .getElementById("userInput")
+                    .scrollIntoView({ block: "start", behavior: "smooth" });
+                $.get("/get", { msg: nsrawText }).done(function(data) {
+                    sanitizedata = escape(data)
+                    var botHtml = '<p class="botText"><span>' + sanitizedata + "</span></p>";
+                    $("#chatbox").append(botHtml);
+                    document
+                    .getElementById("userInput")
+                    .scrollIntoView({ block: "start", behavior: "smooth" });
+                });
+            }
+            $("#textInput").keypress(function(e) {
+                if (e.which == 13) {
+                    getBotResponse();
+                }
+            });
+                        function escape(string) {
+                                  return string.replace(/[&"'<>]/g, c => {
+                                        switch(c) {
+                                          case '&':
+                                                return '&amp;'
+                                          case '"':
+                                                return '&quot;'
+                                          case '\'':
+                                                return '&#39;'
+                                          case '<':
+                                                return '&lt;'
+                                          case '>':
+                                                return '&gt;'
+                                          default:
+                                                  return c
+                                        }
+                                  })
+                                }
+      </script>
+    </div>
+    <footer>
+	        <ul>
+              		<li>Scrivi <strong>!y</strong> per dare un feedback positivo</li>
+                        <li>Scrivi <strong>!n</strong> per dare un feedback negativo e inserire una nuova frase</li>
+                        <li>Scrivi <strong>!o per</strong> segnalare la risposta come offensiva e inserire una nuova frase</li>
+                        <li>Scrivi <strong>!nn</strong> per dare un feedback negativo senza inserire una nuova frase</li>
+                        <li>Scrivi <strong>!oo</strong>  per segnalare la risposta come offensiva senza inserire una nuova frase</li>
+                        <li>Scrivi <strong>!i</strong> per inserire una nuova frase senza dare alcun feedback</li>
+                </ul>
+
+        <button id="guide">Come funziona ChadBot?</button><br>
+        <div id="dropdown_guide">
+		<h3>In arrivo</h3>
+	</div><br>
+                <h3 style="background-color:green;">ChadBot impara dagli utenti, e non è in grado di distinguere frasi offensive da frasi non offensive. Utilizza il feedback come indicato in guida per correggere eventuali comportamenti sbagliati.</h3>
+    </footer>
+
+    <script>
+        $('#guide').click(function(){
+            $('#dropdown_guide').toggleClass("active")
+        }
+
+        )
+    </script>
+  </body>
+</html>
