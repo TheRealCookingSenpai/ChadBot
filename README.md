@@ -1,5 +1,7 @@
 # ChadBot
-Un chatbot sperimentale in Italiano, scritto in Python
+Un chatbot sperimentale in Italiano, scritto in Python.
+
+ChadBot è in esecuzione su http://chadbot.ml
 
 ## Cosa è ChadBot
 
