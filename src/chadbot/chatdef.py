@@ -3,14 +3,18 @@
 #|================== CODED BY ===========================|
 #|===============TheCookingSenpai========================|
 #|                                                       |
-#| Per far funzionare il programma, è necessario creare  |
+#| Per far funzionare il programma, Ã¨ necessario creare  |
 #| un database e settare i parametri nella funzione      |
 #| mysql.connector.connect() posta sotto agli import.    |
 #| Il programma necessita anche della cartella ./session |
-#| ed è progettato per funzionare con flask.             |
+#| ed Ã¨ progettato per funzionare con flask.             |
 #|                                                       |
 #|=======================================================|
 
+# TODO: implementare un sistema di 'mi aspetto questa o quest'altra risposta in base a qualcosa'
+# TODO: vedi se Ã¨ il caso di seguire anche questo https://github.com/luozhouyang/python-string-similarity
+# TODO: capire le domande
+# TODO: Allenare sui dialoghi dei film https://anjaqantina.jimdofree.com
 
 import random
 import mysql.connector
@@ -18,10 +22,10 @@ import os
 import unidecode
 import sys
 
-db = mysql.connector.connect(host="localhost", user="YOUR_DB_USER", password="YOUR_DB_PASSWORD", database="YOUR_DB_NAME")
+db = mysql.connector.connect(host="localhost", user="chatuser", password="CHAT20db!", database="chatdb")
 cursor = db.cursor()
 
-# Funzione che calcola la similarità di più frasi con l'algoritmo di Jaccard (utilizzata in caso non ci siano match precisi)
+# Funzione che calcola la similaritÃ  di piÃ¹ frasi con l'algoritmo di Jaccard (utilizzata in caso non ci siano match precisi)
 def get_jaccard_sim(str1, str2):
     a = set(str1.split())
     b = set(str2.split())
@@ -35,6 +39,10 @@ def digest(msg, cookie):
                 os.system("mkdir /var/www/chadbot/chadbot/session/" + cookie)
         sessiondir = "/var/www/chadbot/chadbot/session/" + cookie
 
+        # Per i messaggi telegram, toglie gli apici
+        if msg.startswith("'") and msg.endswith("'"):
+                msg = msg[1:-1]
+
         # Check di controllo per i comandi (partono con !)
         if msg.startswith("!"):
                 cmd = msg.split("!")[1].strip()
@@ -43,7 +51,7 @@ def digest(msg, cookie):
                     return "Numero sessione: " + cookie
                 if cmd=="n" or cmd=="o" or cmd=="nn" or cmd=="oo":
                         diminuizione = 1
-                        # Se il messaggio è segnato come offensivo, il feedback cala notevolmente
+                        # Se il messaggio Ã¨ segnato come offensivo, il feedback cala notevolmente
                         if cmd=="o" or cmd=="oo":
                                 diminuizione = 5
                         # Diminuire confidenza
@@ -52,14 +60,14 @@ def digest(msg, cookie):
                                         ultimo_input = feedbackbuffer.read().strip()
                                 with open(sessiondir + "/ultimarisposta") as feedbackbuffer:
                                         ultimo_output = feedbackbuffer.read().strip()
-                                # Prova a creare la tabella così da risolvere il problema in caso di similitudini (tabella non esistente)
+                                # Prova a creare la tabella cosÃ¬ da risolvere il problema in caso di similitudini (tabella non esistente)
                                 try:
                                     query = "CREATE TABLE `" + ultimo_input + "` (output varchar(255), confidenza int)"
                                     cursor.execute(query)
                                     db.commit()
                                     print("Tabella creata (" + ultimo_input + ")")
                                 except:
-                                    print("Tabella già presente (" + ultimo_input + ")")
+                                    print("Tabella giÃ  presente (" + ultimo_input + ")")
                                 query = "UPDATE `" + ultimo_input + "` SET confidenza = confidenza - " + str(diminuizione) + " WHERE output LIKE '" + ultimo_output + "'"
                                 cursor.execute(query)
                                 db.commit()
@@ -70,7 +78,7 @@ def digest(msg, cookie):
                                                 previous.flush()
                                                 return "Come pensi che dovrei rispondere? (Per favore, scrivi solamente la frase che useresti per rispondere al tuo messaggio, senza aggiunte o perifrasi varie)"
                                 else:
-                                        return "Il tuo feedback è stato registrato."
+                                        return "Il tuo feedback Ã¨ stato registrato."
                         # In caso di errore, messaggio di cortesia
                         except Exception as exc:
                                 print("Non sono riuscito a diminuire la confidenza.")
@@ -83,7 +91,7 @@ def digest(msg, cookie):
                                         ultimo_input = feedbackbuffer.read().strip()
                                 with open(sessiondir + "/ultimarisposta") as feedbackbuffer:
                                         ultimo_output = feedbackbuffer.read().strip()
-                                # Prova a creare la tabella così da risolvere il problema in caso di similitudini (tabella non esistente)
+                                # Prova a creare la tabella cosÃ¬ da risolvere il problema in caso di similitudini (tabella non esistente)
                                 try:
                                     query = "CREATE TABLE `" + ultimo_input + "` (output varchar(255), confidenza int)"
                                     cursor.execute(query)
@@ -93,7 +101,7 @@ def digest(msg, cookie):
                                     db.commit()
                                     print("Tabella creata (" + ultimo_input + ").")
                                 except:
-                                    print("Tabella già esistente (" + ultimo_input + ")")
+                                    print("Tabella giÃ  esistente (" + ultimo_input + ")")
                                 query = "UPDATE `" + ultimo_input + "` SET confidenza = confidenza + 1 WHERE output LIKE '" + ultimo_output + "'"
                                 cursor.execute(query)
                                 db.commit()
@@ -122,18 +130,19 @@ def digest(msg, cookie):
                 else:
                         return ">> Comando non riconosciuto. Scrivi !help per le istruzioni o !cmd per la lista dei comandi. <<"
 
-        # Il messaggio viene trasformato in minuscolo, vengono tolti segni di punteggiatura e simili e vengono normalizzati gli accenti
+        #Il messaggio viene trasformato in minuscolo, vengono tolti segni di punteggiatura e simili e vengono normalizzati gli accenti
+        # TODO: usare nltk per normalizzarlo ancora di piÃ¹
         msg = msg.lower().strip()
         msg = msg[:254] + (msg[254:] and '..')
         badchar = ",?!-._*\"'.;{}[]"
         for c in badchar:
                 msg = msg.replace(c, "")
         # Ulteriore protezione (grezza) da eventuali SQL injection
-        msg = msg.replace("SELECT", "")
-        msg = msg.replace("DELETE", "")
-        msg = msg.replace("DROP", "")
-        msg = msg.replace("FROM", "")
-        msg = msg.replace("JOIN", "")
+        msg = msg.replace("select", "")
+        msg = msg.replace("delete", "")
+        msg = msg.replace("drop", "")
+        msg = msg.replace("from", "")
+        msg = msg.replace("join", "")
         orig = msg
         # Rimozione accentate
         msg = unidecode.unidecode(msg)
@@ -152,7 +161,7 @@ def digest(msg, cookie):
                         cursor.execute("CREATE TABLE `" + inputmsg + "` (output varchar(255), confidenza int)")
                         db.commit()
                 except:
-                        print("Non son riuscito a creare la tabella (magari esiste già?)")
+                        print("Non son riuscito a creare la tabella (magari esiste giÃ ?)")
                 # Controllo per evitare ridondanze
                 dupli_query = "SELECT * FROM `" + inputmsg + "` WHERE output LIKE '" + msg + "'"
                 print(dupli_query)
@@ -165,9 +174,9 @@ def digest(msg, cookie):
                         cursor.execute("INSERT INTO `" + inputmsg + "` VALUES ('" + msg + "', 100)")
                         db.commit()
                 else:
-                        # Aumento confidenza se la risposta esiste già
+                        # Aumento confidenza se la risposta esiste giÃ 
                         try:
-                                print("Risposta già esistente, aumento la confidenza.")
+                                print("Risposta giÃ  esistente, aumento la confidenza.")
                                 dupli_query = "UPDATE `" + inputmsg + "` SET confidenza = confidenza + 1 WHERE output LIKE '" + msg + "'"
                                 cursor.execute(dupli_query)
                                 db.commit()
@@ -191,7 +200,7 @@ def digest(msg, cookie):
         except:
                 result = False
         if not result:
-                # Sperimentale: valuta la similarità con altre frasi
+                # Sperimentale: valuta la similaritÃ  con altre frasi
                 query_similar = "SHOW TABLES"
                 cursor.execute(query_similar)
                 all_tables = cursor.fetchall()
@@ -199,12 +208,13 @@ def digest(msg, cookie):
                 similitudine = []
                 for table in all_tables:
                     similarity = get_jaccard_sim(msg, table[0])
-                    if similarity > 0.20:
+                    if similarity > 0.25:
                         candidati.append(table[0])
                         similitudine.append(similarity)
                 print("La ricerca di similitudini ha trovato " + str(len(candidati)) + " candidati")
                 if len(candidati) > 0:
-                    # Per ora emette solo un candidato random
+                    # Per ora emette solo un candidato random 
+                    # TODO: inserire pesi anche per i candidati
                     candidato_scelto = random.choice(candidati)
                     print("E' stato scelto " + candidato_scelto + " come miglior candidato")
                     cursor.execute("SELECT output FROM `" + candidato_scelto + "` ORDER BY confidenza DESC")
@@ -221,6 +231,11 @@ def digest(msg, cookie):
                     return "Non conosco questa frase. Come pensi che dovrei rispondere? (Per favore, scrivi solamente la frase che useresti per rispondere al tuo messaggio, senza aggiunte o perifrasi varie)"
         # Non uso l'else in modo da permettere all'eventuale similitudine di rientrare in questo if ugualmente. Eventuali not result non gestiti vengono nel prossimo else
         if result:
+                # TODO: Far si che i pesi tengano conto del punteggio e non solo dell'ordine
+                # ad esempio: il peso potrebbe derivare dai valori di punteggio /10
+                # utilizzare la lista confidenze nel for per assegnare ad ogni frase
+                # il peso confidenza/10 (le confidenze vengono passate con il for visto che sono nello
+                # stesso ordine e numero
                 resultweights = []
                 resultstrings = []
                 biggestweight = (len(result) + 1)*4
@@ -232,6 +247,7 @@ def digest(msg, cookie):
                         print("Currentweight for " + str(resvar) + " is " + str(biggestweight))
                 risposta = "".join(random.choices(resultstrings,weights=resultweights,k=1))
                 risposta = risposta[2:-3]
+                #risposta = "".join(random.choice(result))
                 # Salvataggio ultimarisposta
                 with open(sessiondir + "/ultimarisposta", "w") as ultimarisposta:
                         ultimarisposta.write(risposta)
@@ -246,10 +262,11 @@ def digest(msg, cookie):
 
 # Debugging
 if __name__ == "__main__":
-        if len(sys.argv) < 2:
+        if len(sys.argv) < 3:
                 print("Devi specificare un parametro.")
-        elif len(sys.argv) > 2:
+        elif len(sys.argv) > 3:
                 print("Devi specificare solamente un parametro.")
         else:
                 print("Parametro: " + str(sys.argv[1]))
-                print(digest(str(sys.argv[1]), "TESTINGCOOKIE"))
+                print("ID : " + str(sys.argv[2]))
+                print(digest(str(sys.argv[1]), str(sys.argv[2])))
