@@ -1,11 +1,11 @@
 # ChadBot
 Un chatbot sperimentale in Italiano, scritto in Python.
 
-ChadBot è in esecuzione su http://chadbot.ml
+ChadBot è in esecuzione su http://chadbot.ml e su telegram tramite https://t.me/TG_ChadBot
 
 ## Cosa è ChadBot
 
-Si tratta di un semplice chatbot scritto in Python completamente da zero.
+Si tratta di un semplice chatbot scritto in Python completamente da zero, funzionante anche tramite Telegram.
 
 L'obbiettivo è quello di ottenere un sistema di apprendimento semplice, leggero e privo di peso sulle risorse della macchina.
 
@@ -25,6 +25,8 @@ N.B. I comandi !nn e !oo permettono di fornire un feedback senza inserire nuove 
 
 # Come hostare la propria versione di ChadBot
 
+## Versione web:
+
 - Utilizza un qualsiasi stack apache+mysql su una qualsiasi distribuzione Linux
 - Installa Python 3.6 o superiore, ed installa i moduli necessari contenuti in chatdef.py, oltre a mod_wsgi per apache
 - Crea /var/www/chadbot inserendo il contenuto di src
@@ -32,3 +34,11 @@ N.B. I comandi !nn e !oo permettono di fornire un feedback senza inserire nuove 
 - Crea un database vuoto e modifica chatdef.py in modo da inserire le giuste credenziali
 - Riavvia apache
 - Collegati e divertiti!
+
+## Versione Telegram:
+
+- Crea un bot con BotFather
+- Segna il tuo token e inseriscilo in telebot.py
+- Avvia telebot.py e inizia a parlare con il bot su Telegram
+
+### Le versioni web e Telegram sono compatibili e indipendenti
